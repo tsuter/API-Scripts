@@ -1,0 +1,20 @@
+#!/bin/sh
+
+apiURL='https://casper:8443/JSSResource/computers/udid/'
+apiUser='apiuser'
+apiPass='apipass'
+
+udid=$(/usr/sbin/system_profiler SPHardwareDataType | /usr/bin/awk '/Hardware UUID:/ { print $3 }')
+
+primaryUser=$(/usr/bin/curl -s -u ${apiUser}:${apiPass} "${apiURL}${udid}" | /usr/bin/xpath '//location/real_name' 2>/dev/null | sed -e 's/<real_name>//g;s/<\/real_name>/\\n/g' )
+emailAddress=$(/usr/bin/curl -s -u ${apiUser}:${apiPass} "${apiURL}${udid}" | /usr/bin/xpath '//location/email_address' 2>/dev/null | sed -e 's/<email_address>//g;s/<\/email_address>/\\n/g' )
+assetTag=$(/usr/bin/curl -s -u ${apiUser}:${apiPass} "${apiURL}${udid}" | /usr/bin/xpath '//general/asset_tag' 2>/dev/null | sed -e 's/<asset_tag>//g;s/<\/asset_tag>/\\n/g' )
+location=$(find /var/uws/location_* | sed 's|/var/uws/location_||' )
+
+
+echo "****************************************"
+echo "Primary User: ${primaryUser}"
+echo "Email Address: ${emailAddress}"
+echo "Asset Tag: ${assetTag}"
+echo "Location: ${location}"
+echo "****************************************"
